@@ -64,7 +64,7 @@ services:
     # CONFIGURAÇÕES DE REDE E RECURSOS
     # =============================================================================
     networks:
-      - botcity-network
+      - minha_rede
     
     # Recursos do container
     deploy:
@@ -113,5 +113,5 @@ volumes:
 # REDES
 # =============================================================================
 networks:
-  botcity-network:
+  minha_rede:
     driver: bridge

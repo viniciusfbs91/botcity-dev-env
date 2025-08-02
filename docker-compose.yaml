@@ -17,8 +17,7 @@ services:
     # =============================================================================
     ports:
       - "${VNC_HOST_PORT:-5910}:${VNC_PORT:-5910}"       # VNC Server
-      - "${SSH_HOST_PORT:-2222}:${SSH_PORT:-2222}"       # SSH Server  
-      - "${VSCODE_HOST_PORT:-8080}:${VSCODE_PORT:-8080}" # VSCode Server
+      - "${SSH_HOST_PORT:-2222}:${SSH_PORT:-2222}"       # SSH Server
     
     # =============================================================================
     # VARIÁVEIS DE AMBIENTE
@@ -33,7 +32,6 @@ services:
       # Configurações de serviços
       - VNC_PORT=${VNC_PORT:-5910}
       - SSH_PORT=${SSH_PORT:-2222}
-      - VSCODE_PORT=${VSCODE_PORT:-8080}
       
       # Senhas (configure no .env)
       - ROOT_PASSWORD=${ROOT_PASSWORD:-defaultpassword}
@@ -53,9 +51,6 @@ services:
       # Configurações persistentes
       - ${CONFIG_PATH:-./config}:/root/.config
       - ${SSH_KEYS_PATH:-./ssh-keys}:/root/.ssh
-      
-      # Cache do VSCode
-      - vscode-data:/root/.local/share/code-server
       
       # Cache do pip
       - pip-cache:/root/.cache/pip
@@ -94,7 +89,7 @@ services:
     
     # Health check
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'Xtigervnc|sshd|code-server' || exit 1"]
+      test: ["CMD-SHELL", "pgrep -f 'Xtigervnc|sshd' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -104,8 +99,6 @@ services:
 # VOLUMES NOMEADOS
 # =============================================================================
 volumes:
-  vscode-data:
-    driver: local
   pip-cache:
     driver: local
 

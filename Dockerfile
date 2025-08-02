@@ -2,14 +2,14 @@
 # Imagem de Desenvolvimento BotCity com Python 3.11
 # =============================================================================
 # Baseada na imagem oficial botcity-python-desktop com melhorias para 
-# desenvolvimento, incluindo SSH, VSCode Server, VNC e Chrome/ChromeDriver
+# desenvolvimento, incluindo SSH, VNC e Chrome/ChromeDriver
 # =============================================================================
 
 FROM botcity/botcity-python-desktop
 
 # Metadados da imagem
 LABEL maintainer="Vinicius Batista viniciusfranciscob@hotmail.com.br"
-LABEL description="Ambiente de desenvolvimento BotCity com Python 3.11, SSH, VSCode Server e VNC"
+LABEL description="Ambiente de desenvolvimento BotCity com Python 3.11, SSH e VNC"
 LABEL version="1.0"
 
 # =============================================================================
@@ -25,7 +25,6 @@ ENV NO_AT_BRIDGE=1
 # Portas de serviços
 ENV VNC_PORT=5910
 ENV SSH_PORT=2222
-ENV VSCODE_PORT=8080
 
 # Senhas (serão sobrescritas via docker-compose)
 ENV ROOT_PASSWORD=defaultpassword
@@ -105,11 +104,6 @@ RUN mkdir -p /var/run/sshd \
     && echo 'UseDNS no' >> /etc/ssh/sshd_config
 
 # =============================================================================
-# INSTALAÇÃO DO VSCODE SERVER
-# =============================================================================
-RUN curl -fsSL https://code-server.dev/install.sh | sh
-
-# =============================================================================
 # CONFIGURAÇÃO DO VNC
 # =============================================================================
 RUN mkdir -p /root/.vnc \
@@ -151,7 +145,7 @@ RUN chmod +x /botcity/wrapper.sh
 # =============================================================================
 # EXPOSIÇÃO DE PORTAS
 # =============================================================================
-EXPOSE $VNC_PORT $SSH_PORT $VSCODE_PORT
+EXPOSE $VNC_PORT $SSH_PORT
 
 # =============================================================================
 # PONTO DE ENTRADA E COMANDO PADRÃO

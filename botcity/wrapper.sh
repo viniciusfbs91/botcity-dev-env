@@ -4,7 +4,7 @@
 # BotCity Development Environment Startup Script
 # =============================================================================
 # Este script inicializa todos os serviços necessários para o ambiente de
-# desenvolvimento: VNC, SSH, VSCode Server e configurações do sistema
+# desenvolvimento: VNC, SSH e configurações do sistema
 # =============================================================================
 
 set -e
@@ -34,9 +34,6 @@ cleanup() {
     
     # Parar SSH
     service ssh stop 2>/dev/null || true
-    
-    # Parar code-server
-    pkill -f code-server 2>/dev/null || true
     
     # Parar Xvfb
     pkill -f Xvfb 2>/dev/null || true
@@ -77,7 +74,6 @@ rm -f /root/.vnc/*.pid 2>/dev/null || true
 log "🔄 Verificando processos existentes..."
 pkill -f "Xtigervnc|Xvnc" 2>/dev/null || true
 pkill -f "Xvfb" 2>/dev/null || true
-pkill -f "code-server" 2>/dev/null || true
 
 # Aguardar processos encerrarem completamente
 sleep 2
@@ -167,12 +163,6 @@ log "🔄 Iniciando servidor SSH na porta ${SSH_PORT:-22}..."
 service ssh start > /dev/null 2>&1
 
 # =============================================================================
-# CONFIGURAÇÃO DO VSCODE SERVER
-# =============================================================================
-log "💻 Iniciando VSCode Server na porta ${VSCODE_PORT:-8080}..."
-nohup code-server --bind-addr 0.0.0.0:${VSCODE_PORT:-8080} --auth none /workspace > /var/log/code-server.log 2>&1 &
-
-# =============================================================================
 # CONFIGURAÇÕES FINAIS
 # =============================================================================
 # Configurar autocutsel para clipboard
@@ -188,7 +178,6 @@ sleep 5
 check_service "Xvfb" "pgrep -f 'Xvfb'"
 check_service "VNC Server" "pgrep -f 'Xtigervnc|Xvnc'"
 check_service "SSH Server" "pgrep -f sshd"
-check_service "VSCode Server" "pgrep -f code-server"
 
 # Verificação final de processos críticos
 log "🔍 Verificando status final dos processos..."
@@ -202,7 +191,6 @@ log ""
 log "📋 Informações de Acesso:"
 log "   🖥️  VNC: localhost:${VNC_PORT:-5910} (senha: conforme configurado)"
 log "   🔑 SSH: ssh root@localhost -p ${SSH_PORT:-22}"
-log "   💻 VSCode: http://localhost:${VSCODE_PORT:-8080}"
 log ""
 log "📁 Diretório de trabalho: /workspace"
 log ""

@@ -1,0 +1,117 @@
+# =============================================================================
+# Docker Compose para Ambiente de Desenvolvimento BotCity
+# =============================================================================
+# Este arquivo configura o ambiente completo de desenvolvimento com todas
+# as dependências e serviços necessários
+# =============================================================================
+services:
+  botcity-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_NAME:-botcity-dev}
+    hostname: ${CONTAINER_HOSTNAME:-botcity-development}
+    
+    # =============================================================================
+    # CONFIGURAÇÃO DE PORTAS
+    # =============================================================================
+    ports:
+      - "${VNC_HOST_PORT:-5910}:${VNC_PORT:-5910}"       # VNC Server
+      - "${SSH_HOST_PORT:-2222}:${SSH_PORT:-2222}"       # SSH Server  
+      - "${VSCODE_HOST_PORT:-8080}:${VSCODE_PORT:-8080}" # VSCode Server
+    
+    # =============================================================================
+    # VARIÁVEIS DE AMBIENTE
+    # =============================================================================
+    environment:
+      # Configurações de sistema
+      - TZ=${TIMEZONE:-America/Sao_Paulo}
+      - USER=root
+      - DEBIAN_FRONTEND=noninteractive
+      - NO_AT_BRIDGE=1
+      
+      # Configurações de serviços
+      - VNC_PORT=${VNC_PORT:-5910}
+      - SSH_PORT=${SSH_PORT:-2222}
+      - VSCODE_PORT=${VSCODE_PORT:-8080}
+      
+      # Senhas (configure no .env)
+      - ROOT_PASSWORD=${ROOT_PASSWORD:-defaultpassword}
+      - VNC_PASSWORD=${VNC_PASSWORD:-vncpassword}
+      
+      # Configurações do Chrome
+      - CHROME_DIR=/opt/chrome
+      - CHROMEDRIVER_DIR=/opt/chromedriver
+    
+    # =============================================================================
+    # VOLUMES
+    # =============================================================================
+    volumes:
+      # Workspace principal
+      - ${WORKSPACE_PATH:-./workspace}:/workspace
+      
+      # Configurações persistentes
+      - ${CONFIG_PATH:-./config}:/root/.config
+      - ${SSH_KEYS_PATH:-./ssh-keys}:/root/.ssh
+      
+      # Cache do VSCode
+      - vscode-data:/root/.local/share/code-server
+      
+      # Cache do pip
+      - pip-cache:/root/.cache/pip
+    
+    # =============================================================================
+    # CONFIGURAÇÕES DE REDE E RECURSOS
+    # =============================================================================
+    networks:
+      - botcity-network
+    
+    # Recursos do container
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-4G}
+          cpus: '${CPU_LIMIT:-2.0}'
+        reservations:
+          memory: ${MEMORY_RESERVATION:-2G}
+          cpus: '${CPU_RESERVATION:-1.0}'
+    
+    # =============================================================================
+    # CONFIGURAÇÕES DE SEGURANÇA E CAPACIDADES
+    # =============================================================================
+    cap_add:
+      - SYS_PTRACE  # Para debugging
+    
+    security_opt:
+      - seccomp:unconfined  # Para Chrome/Selenium
+    
+    # =============================================================================
+    # OUTRAS CONFIGURAÇÕES
+    # =============================================================================
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'Xtigervnc|sshd|code-server' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# =============================================================================
+# VOLUMES NOMEADOS
+# =============================================================================
+volumes:
+  vscode-data:
+    driver: local
+  pip-cache:
+    driver: local
+
+# =============================================================================
+# REDES
+# =============================================================================
+networks:
+  botcity-network:
+    driver: bridge
